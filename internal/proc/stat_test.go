@@ -29,3 +29,21 @@ func TestReadStatSelf(t *testing.T) {
 		t.Fatal("name not present")
 	}
 }
+
+func TestSplitStat(t *testing.T) {
+	line := "4242 (a b)) S 1 4242 4242 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+
+	comm, fields, err := splitStat(line)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if comm != "a b)" {
+		t.Fatalf("expected comm %q, got %q", "a b)", comm)
+	}
+	if fields[0] != "S" {
+		t.Fatalf("exected state %q, got %q", "1", fields[0])
+	}
+	if fields[1] != "1" {
+		t.Fatalf("expected state %q, got %q", "1", fields[1])
+	}
+}
