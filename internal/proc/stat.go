@@ -20,7 +20,7 @@ func parseStat(content string) (*model.ProcessInfo, error) {
 	info := &model.ProcessInfo{PID: pid}
 	info.Name = comm
 
-	if len(fields) < 2 {
+	if len(fields) < 20 {
 		return nil, fmt.Errorf("stat line has too few fields")
 	}
 

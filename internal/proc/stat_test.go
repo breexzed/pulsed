@@ -74,3 +74,12 @@ func TestParseStatFieldPositions(t *testing.T) {
 		t.Fatalf("expected StartTime %d, got %d", 22, info.StartTime)
 	}
 }
+
+func TestParseStatShortLine(t *testing.T) {
+	line := "1 (x) S 1 2 3"
+
+	_, err := parseStat(line)
+	if err == nil {
+		t.Fatal("expected error for short stat line")
+	}
+}
