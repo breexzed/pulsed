@@ -47,3 +47,30 @@ func TestSplitStat(t *testing.T) {
 		t.Fatalf("expected state %q, got %q", "1", fields[1])
 	}
 }
+
+func TestParseStatFieldPositions(t *testing.T) {
+	line := "1 (name) 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
+
+	info, err := parseStat(line)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.PID != 1 {
+		t.Fatalf("expected PID %d, got %d", 1, info.PID)
+	}
+	if info.State != "3" {
+		t.Fatalf("expected State 3, got %q", info.State)
+	}
+	if info.PPID != 4 {
+		t.Fatalf("expected PPID %d, got %d", 4, info.PPID)
+	}
+	if info.UTime != 14 {
+		t.Fatalf("expected UTime %d, got %d", 14, info.UTime)
+	}
+	if info.STime != 15 {
+		t.Fatalf("expected STime %d, got %d", 15, info.STime)
+	}
+	if info.StartTime != 22 {
+		t.Fatalf("expected StartTime %d, got %d", 22, info.StartTime)
+	}
+}
