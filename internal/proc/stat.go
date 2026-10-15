@@ -9,20 +9,15 @@ import (
 	"strings"
 )
 
-func readStat(pid int) (*model.ProcessInfo, error) {
+func parseStat(content string) (*model.ProcessInfo, error) {
+	content = strings.TrimSpace(content)
+
+	pid, comm, fields, err := splitStat(content)
+	if err != nil {
+		return nil, err
+	}
+
 	info := &model.ProcessInfo{PID: pid}
-
-	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
-	if err != nil {
-		return nil, err
-	}
-
-	content := strings.TrimSpace(string(data))
-
-	comm, fields, err := splitStat(content)
-	if err != nil {
-		return nil, err
-	}
 	info.Name = comm
 
 	if len(fields) < 2 {
@@ -59,18 +54,32 @@ func readStat(pid int) (*model.ProcessInfo, error) {
 	return info, nil
 }
 
-func splitStat(line string) (comm string, fields []string, err error) {
+func readStat(pid int) (*model.ProcessInfo, error) {
+
+	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
+	if err != nil {
+		return nil, err
+	}
+
+	return parseStat(string(data))
+}
+
+func splitStat(line string) (pid int, comm string, fields []string, err error) {
 	open := strings.Index(line, "(")
 	if open == -1 {
-		return "", nil, fmt.Errorf("no open paren found in line")
+		return 0, "", nil, fmt.Errorf("no open paren found in line")
 	}
 	close := strings.LastIndex(line, ")")
 	if close == -1 {
-		return "", nil, fmt.Errorf("no close paren found in line")
+		return 0, "", nil, fmt.Errorf("no close paren found in line")
+	}
+	pid, err = strconv.Atoi(strings.TrimSpace(line[:open]))
+	if err != nil {
+		return 0, "", nil, err
 	}
 
 	comm = line[open+1 : close]
 	fields = strings.Fields(line[close+1:])
 
-	return comm, fields, nil
+	return pid, comm, fields, nil
 }

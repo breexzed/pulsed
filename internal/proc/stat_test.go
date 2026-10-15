@@ -33,7 +33,7 @@ func TestReadStatSelf(t *testing.T) {
 func TestSplitStat(t *testing.T) {
 	line := "4242 (a b)) S 1 4242 4242 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
 
-	comm, fields, err := splitStat(line)
+	_, comm, fields, err := splitStat(line)
 	if err != nil {
 		t.Fatal(err)
 	}
