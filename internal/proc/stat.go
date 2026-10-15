@@ -38,6 +38,24 @@ func readStat(pid int) (*model.ProcessInfo, error) {
 	}
 	info.PPID = ppid
 
+	Utime, err := strconv.Atoi(fields[11])
+	if err != nil {
+		return nil, err
+	}
+	info.UTime = int64(Utime)
+
+	Stime, err := strconv.Atoi(fields[12])
+	if err != nil {
+		return nil, err
+	}
+	info.STime = int64(Stime)
+
+	startTime, err := strconv.Atoi(fields[19])
+	if err != nil {
+		return nil, err
+	}
+	info.StartTime = int64(startTime)
+
 	return info, nil
 }
 
