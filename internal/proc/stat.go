@@ -69,8 +69,8 @@ func splitStat(line string) (pid int, comm string, fields []string, err error) {
 	if open == -1 {
 		return 0, "", nil, fmt.Errorf("no open paren found in line")
 	}
-	close := strings.LastIndex(line, ")")
-	if close == -1 {
+	closeParen := strings.LastIndex(line, ")")
+	if closeParen == -1 {
 		return 0, "", nil, fmt.Errorf("no close paren found in line")
 	}
 	pid, err = strconv.Atoi(strings.TrimSpace(line[:open]))
@@ -78,8 +78,8 @@ func splitStat(line string) (pid int, comm string, fields []string, err error) {
 		return 0, "", nil, err
 	}
 
-	comm = line[open+1 : close]
-	fields = strings.Fields(line[close+1:])
+	comm = line[open+1 : closeParen]
+	fields = strings.Fields(line[closeParen+1:])
 
 	return pid, comm, fields, nil
 }
