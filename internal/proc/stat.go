@@ -33,17 +33,17 @@ func parseStat(content string) (*model.ProcessInfo, error) {
 	}
 	info.PPID = ppid
 
-	Utime, err := strconv.Atoi(fields[11])
+	utime, err := strconv.Atoi(fields[11])
 	if err != nil {
 		return nil, err
 	}
-	info.UTime = int64(Utime)
+	info.UTime = int64(utime)
 
-	Stime, err := strconv.Atoi(fields[12])
+	stime, err := strconv.Atoi(fields[12])
 	if err != nil {
 		return nil, err
 	}
-	info.STime = int64(Stime)
+	info.STime = int64(stime)
 
 	startTime, err := strconv.Atoi(fields[19])
 	if err != nil {
