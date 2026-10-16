@@ -1,117 +1,36 @@
+<!-- readme-pattern: off — owner wants a short learning-project README (2026-10-17). -->
 # Pulsed
 
-Pulsed is a Linux process monitor, written in Go. It reads what the kernel says about every running process. It finds what changed since the last read. It writes the changes to a log and shows everything on one terminal screen.
+**This is a learning project.** I am learning Linux internals and Go by building a process monitor from `/proc` up. It is pre-alpha. Nothing runs yet.
 
-The kernel keeps a folder for each running process under `/proc`. Pulsed reads those folders about once per second.
+## What works today
 
-## Status
+- `ListPIDs` lists the process IDs in `/proc`.
+- A parser for `/proc/PID/stat`. It survives process names with spaces and `)` in them, and returns an error on short lines instead of panicking.
+- 125 lines of Go, 136 lines of tests. Standard library only. Tests run in CI.
 
-Pre-alpha. Linux only.
+## What I am testing next
 
-- **Today:** one function that lists process numbers. Nothing runs yet.
-- **Everything below is planned.** A feature leaves "planned" only after a test passes and someone has seen it work.
+The plan was simple: read `/proc` once per second, compare reads, report when a process starts or exits.
 
-## Why Pulsed
+The claim that plan has to survive: can a once-per-second read see a process that lives 5 ms? If it can't, most "started" and "exited" events would never be reported. I am measuring that next. If polling fails, the fix I want to try is eBPF: let the kernel report each exec as it happens.
 
-- **Changes, not just a snapshot.** Pulsed compares each read to the one before. It records what changed: a process started, exited, changed state, spiked in CPU use, or changed its thread count.
-- **A true identity for each process.** The kernel reuses process numbers. Pulsed plans to tell processes apart by number plus start time. This idea is not tested yet.
-- **A log you can search.** Events go to a JSON-lines file, one event per line.
-- **One screen.** A sorted process table, a detail view, resource limits, and an event timeline. Click, scroll, drag, or use the keyboard. The screen resizes with your terminal. You can kill your own processes after a confirmation.
-- **Built to learn.** An educational project built to understand how linux internal systems work.
+## How I work here
 
-## How it works
+I write `internal/proc`, `internal/model`, `internal/sample` and `internal/event` by hand. AI tools may explain and review that code. They do not write it. The rules are in `AGENTS.md`.
 
-```mermaid
-flowchart TD
-    subgraph K["Ground — the Linux kernel"]
-        P0["/proc — one folder per process,<br/>stat, status, threads list and more.<br/>Read about once per second."]
-    end
+`learning/` is my log: what I predicted, what happened, and what I got wrong.
 
-    subgraph D["Reading and comparing"]
-        R["proc — reads and parses /proc files"]
-        T["model — the shared types:<br/>Sample, Event, Identity"]
-        S["sample — runs the read on a timer,<br/>hands samples over a channel"]
-        E["event — compares two samples,<br/>produces started / exited /<br/>state_changed / cpu_spike /<br/>threads_changed"]
-    end
+Pull requests to those folders won't be merged. Issues and ideas are welcome.
 
-    subgraph W["Wiring and logging"]
-        O["obs — appends events to a<br/>JSON-lines log file"]
-        C["cmd/pulsed — starts everything"]
-    end
+## Run the tests
 
-    subgraph F["The face "]
-        U["tui — the terminal screen:<br/>sorted process table, details,<br/>kill with confirmation,<br/>mouse and keyboard"]
-    end
-
-    P0 --> R
-    R --> S
-    S -->|"one Sample per tick"| E
-    E -->|"events"| O
-    E -->|"events"| U
-    S -->|"latest Sample"| U
-    C -.starts.-> S
-    C -.starts.-> U
-    T --- R
-    T --- S
-    T --- E
-    T --- U
-```
-
-Read it from the top. The kernel exposes `/proc`. `proc` reads it. `sample` repeats the read on a timer. `event` compares two samples. `obs` writes the log. `tui` draws the screen. `model` holds the types they share.
-
-- The core uses only the Go standard library.
-- The screen uses [Bubble Tea](https://github.com/charmbracelet/bubbletea).
-- Pulsed needs no root.
-
-### The screen (planned)
-
-```
-     1        2        3        4
-  ┌──────────────────────────────────┐
-  │ A PROCESS TREE   │ B DETAIL      │
-  │                  │               │
-  ├──────────────────┴───────────────┤
-  │ D PROCESS LIST                   │
-  │                                  │
-  ├────────────────┬─────────────────┤
-  │ E LIMITS       │ F EVENT LOG     │
-  ├────────────────┴─────────────────┤
-  │ TITLE: Pulsed  host  kernel  #42 │
-  └──────────────────────────────────┘
-```
-
-Each panel has a letter, and the frame has coordinates, like an engineering drawing sheet. The colors are Catppuccin Mocha.
-
-## Open source
-
-Pulsed is free software under MIT. See `LICENSE`.
-
-## Build from source
-
-Prerequisites: Linux and Go. The Go version is in `go.mod`.
+Needs Linux and Go (version in `go.mod`).
 
 ```
 go test ./...
 ```
 
-There is nothing to run yet. The program entry point, `cmd/pulsed`, does not exist.
+## License
 
-## Development & verification
-
-`AGENTS.md` is the contributor guide. It sets the rules for people and AI tools. It says which code the owner writes by hand, which code a tool may build, and how work is checked.
-
-The short loop:
-
-```
-gofmt -s -l .
-go vet ./...
-go test ./...
-```
-
-`gofmt` prints nothing when the code is formatted. The command `python3 learning/check.py` reports overdue items in the project's learning log.
-
-## Contributing
-
-Pulsed is pre-alpha and a learning project. The owner writes `internal/proc`, `internal/model`, `internal/sample`, and `internal/event` by hand. Pull requests that change those folders are unlikely to be merged.
-
-Bug reports, ideas, and docs fixes are welcome. For larger changes, please open an issue first. Read `AGENTS.md` before you start.
+MIT. See `LICENSE`.
