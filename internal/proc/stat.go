@@ -14,14 +14,14 @@ func parseStat(content string) (*model.ProcessInfo, error) {
 
 	pid, comm, fields, err := splitStat(content)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("splitting stat content: %w", err)
 	}
 
 	info := &model.ProcessInfo{PID: pid}
 	info.Name = comm
 
 	if len(fields) < 20 {
-		return nil, fmt.Errorf("stat line has too few fields")
+		return nil, fmt.Errorf("stat line has too few fields, got %d", len(fields))
 	}
 
 	state := fields[0]
@@ -29,27 +29,27 @@ func parseStat(content string) (*model.ProcessInfo, error) {
 
 	ppid, err := strconv.Atoi(fields[1])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse ppid: %w", err)
 	}
 	info.PPID = ppid
 
-	utime, err := strconv.Atoi(fields[11])
+	utime, err := strconv.ParseInt(fields[11], 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse utime: %w", err)
 	}
-	info.UTime = int64(utime)
+	info.UTime = utime
 
-	stime, err := strconv.Atoi(fields[12])
+	stime, err := strconv.ParseInt(fields[12], 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse stime: %w", err)
 	}
-	info.STime = int64(stime)
+	info.STime = stime
 
-	startTime, err := strconv.Atoi(fields[19])
+	startTime, err := strconv.ParseInt(fields[19], 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse startTime: %w", err)
 	}
-	info.StartTime = int64(startTime)
+	info.StartTime = startTime
 
 	return info, nil
 }
@@ -75,7 +75,7 @@ func splitStat(line string) (pid int, comm string, fields []string, err error) {
 	}
 	pid, err = strconv.Atoi(strings.TrimSpace(line[:open]))
 	if err != nil {
-		return 0, "", nil, err
+		return 0, "", nil, fmt.Errorf("split for pid: %w", err)
 	}
 
 	comm = line[open+1 : closeParen]
