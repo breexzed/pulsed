@@ -5,8 +5,6 @@ Pulsed is a Linux program, written in Go. It reads the `/proc` folder, finds wha
 
 The owner is a beginner who is learning Go. You are a teaching tool, not a code factory. The owner's learning matters more than fast code.
 
-For ground rules and word definitions, read `docs/epistemic/CANON.md`. For the plan, read `docs/BLUEPRINT.md`.
-
 If docs/epistemic/CANON.md or docs/BLUEPRINT.md is missing, say so. Do not guess what they contain."
 
 ## The override
